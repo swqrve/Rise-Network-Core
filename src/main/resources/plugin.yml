@@ -1,0 +1,27 @@
+name: RiseCore
+description: The core plugin for Rise Network, includes cosmetics, ranks, general commands and more.
+author: Swerve
+main: me.swerve.RiseCore
+version: 1.0
+
+commands:
+  msg:
+    aliases: [ message ]
+  ban:
+    aliases: [ blacklist ]
+  mute:
+  warn:
+  cosmetics:
+  createPermission:
+    aliases: [ cPermission ]
+  hub:
+    aliases: [ lobby ]
+  permissions:
+    aliases: [ perms ]
+  punishments:
+    aliases: [ punishes ]
+  rank:
+    aliases: [ setrank ]
+  r:
+    aliases: [ reply ]
+

@@ -47,11 +47,13 @@ public class Punishment {
         String remainingTime;
         if (!(isExpires())) remainingTime = "Infinity. :)";
         else {
-            Calendar calendar = Calendar.getInstance();
+            Calendar calendar = (Calendar) Calendar.getInstance().clone();
+            Date currentDate = calendar.getTime();
+
             calendar.setTime(getPunishmentDate());
             calendar.add(getTimeFormat(), getPunishmentTime());
 
-            int differenceInSeconds  = TimeUtil.differenceInSeconds(calendar.getTime(), getPunishmentDate());
+            int differenceInSeconds  = TimeUtil.differenceInSeconds(calendar.getTime(), currentDate);
 
             remainingTime = String.format("%02d:%02d", (differenceInSeconds / 60) % 60, differenceInSeconds % 60);
             if (differenceInSeconds / 3600 != 0) remainingTime = String.format("%02d:%02d:%02d", differenceInSeconds / 3600, (differenceInSeconds / 60) % 60, differenceInSeconds % 60);
@@ -64,16 +66,32 @@ public class Punishment {
         String remainingTime;
         if (!(isExpires())) remainingTime = "Infinity. :)";
         else {
-            Calendar calendar = Calendar.getInstance();
+            Calendar calendar = (Calendar) Calendar.getInstance().clone();
+            Date currentDate = calendar.getTime();
+
             calendar.setTime(getPunishmentDate());
             calendar.add(getTimeFormat(), getPunishmentTime());
 
-            int differenceInSeconds  = TimeUtil.differenceInSeconds(calendar.getTime(), getPunishmentDate());
+            int differenceInSeconds  = TimeUtil.differenceInSeconds(calendar.getTime(), currentDate);
 
             remainingTime = String.format("%02d:%02d", (differenceInSeconds / 60) % 60, differenceInSeconds % 60);
             if (differenceInSeconds / 3600 != 0) remainingTime = String.format("%02d:%02d:%02d", differenceInSeconds / 3600, (differenceInSeconds / 60) % 60, differenceInSeconds % 60);
         }
 
         return ChatColor.translateAlternateColorCodes('&', "&cYou are muted. Time Remaining: &f" + remainingTime);
+    }
+
+    public void update() {
+        if (!isExpires() || isExpired()) return;
+
+        Calendar calendar = (Calendar) Calendar.getInstance().clone();
+        Date currentDate = calendar.getTime();
+
+        calendar.setTime(getPunishmentDate());
+        calendar.add(getTimeFormat(), getPunishmentTime());
+
+        int differenceInSeconds  = TimeUtil.differenceInSeconds(calendar.getTime(), currentDate);
+
+        if (differenceInSeconds <= 0) setExpired(true);
     }
 }

@@ -53,7 +53,7 @@ public class MuteCommand implements CommandExecutor {
         if (args[args.length - 1].equalsIgnoreCase("-s")) toSubtract++;
 
         StringBuilder reasonBuilder = new StringBuilder();
-        for (int i = 2; i < args.length - toSubtract; i++) reasonBuilder.append(args[i]);
+        for (int i = 2; i <= (args.length - toSubtract); i++) reasonBuilder.append(" ").append(args[i]);
 
         if (!(args[args.length - 1].equalsIgnoreCase("-s"))) Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&f[&6Rise&f] &c" + playerName + " has been muted for reason: " + reasonBuilder.toString()));
 

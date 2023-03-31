@@ -8,6 +8,7 @@ import me.swerve.profile.type.PunishmentProfile;
 import me.swerve.punishment.Punishment;
 import me.swerve.util.ItemCreator;
 import org.bson.Document;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -45,17 +46,19 @@ public class PunishmentMenu extends Menu {
 
             profile.getPunishments().add(new Punishment(
                     Punishment.PunishmentType.valueOf(doc.getString(punishmentTitle + "type").toUpperCase()),
-                    doc.getDate("date"),
-                    doc.getInteger("timeformat"),
-                    doc.getString("reason"),
-                    doc.getBoolean("expires"),
-                    doc.getInteger("time"),
-                    doc.getString("punisher"),
-                    doc.getBoolean("expired")
+                    doc.getDate(punishmentTitle + "date"),
+                    doc.getInteger(punishmentTitle + "timeformat"),
+                    doc.getString(punishmentTitle + "reason"),
+                    doc.getBoolean(punishmentTitle + "expires"),
+                    doc.getInteger(punishmentTitle + "time"),
+                    doc.getString(punishmentTitle + "punisher"),
+                    doc.getBoolean(punishmentTitle + "expired")
             ));
         }
 
         for (Punishment punishment : profile.getPunishments()) {
+            punishment.update();
+
             Page pageToAddTo = null;
             switch (punishment.getType()) {
                 case BAN:
@@ -78,7 +81,7 @@ public class PunishmentMenu extends Menu {
                                         "&cReason: &f" + punishment.getReason(),
                                         "&cIssuer: &f" + punishment.getPunisherName(),
                                         "&cPunishment Time: &f" + getPunishmentTimeFormat(punishment),
-                                        "&cExpired: " + punishment.isExpired()
+                                        "&cExpired: &f" + punishment.isExpired()
                                         ))
                                 .getItem());
                 break;
@@ -98,7 +101,7 @@ public class PunishmentMenu extends Menu {
     @Override
     public void clickedItem(Inventory inventory, InventoryClickEvent e, Page currentPage) {
         if (e.getCurrentItem().getType() == Material.WOOL)  {
-            String pageIdentifier = "" + ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName()).replaceAll("[^0-9]","");
+            String pageIdentifier = ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName());
 
             for (int i = 0; i < getPages().size(); i++) {
                 Page page = getPages().get(i);

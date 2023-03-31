@@ -77,6 +77,11 @@
     <scope>compile</scope>
   </dependency>
   <dependency>
+    <groupId>org.mongodb</groupId>
+    <artifactId>mongo-java-driver</artifactId>
+    <version>3.11.2</version>
+  </dependency>
+  <dependency>
     <groupId>org.paperspigot</groupId>
     <artifactId>paper-server</artifactId>
     <version>1.7.10</version>

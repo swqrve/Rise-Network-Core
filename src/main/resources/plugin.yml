@@ -10,6 +10,11 @@ commands:
   ban:
     aliases: [ blacklist ]
   mute:
+    aliases: [ shutup ]
+  unban:
+    aliases: [ unblacklist ]
+  unmute:
+    aliases: [ unshutup ]
   warn:
   cosmetics:
   createPermission:

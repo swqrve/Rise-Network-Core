@@ -76,13 +76,13 @@ public class CorePlayer {
 
             punishmentProfile.getPunishments().add(new Punishment(
                     Punishment.PunishmentType.valueOf(doc.getString(punishmentTitle + "type").toUpperCase()),
-                    doc.getDate("date"),
-                    doc.getInteger("timeformat"),
-                    doc.getString("reason"),
-                    doc.getBoolean("expires"),
-                    doc.getInteger("time"),
-                    doc.getString("punisher"),
-                    doc.getBoolean("expired")
+                    doc.getDate(punishmentTitle + "date"),
+                    doc.getInteger(punishmentTitle + "timeformat"),
+                    doc.getString(punishmentTitle + "reason"),
+                    doc.getBoolean(punishmentTitle + "expires"),
+                    doc.getInteger(punishmentTitle + "time"),
+                    doc.getString(punishmentTitle + "punisher"),
+                    doc.getBoolean(punishmentTitle + "expired")
                     ));
         }
     }

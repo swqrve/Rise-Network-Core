@@ -53,7 +53,7 @@ public class WarnCommand implements CommandExecutor {
         if (args[args.length - 1].equalsIgnoreCase("-s")) toSubtract++;
 
         StringBuilder reasonBuilder = new StringBuilder();
-        for (int i = 2; i < args.length - toSubtract; i++) reasonBuilder.append(args[i]);
+        for (int i = 2; i <= (args.length - toSubtract); i++) reasonBuilder.append(" ").append(args[i]);
 
         int finalFormat;
         switch (format) {

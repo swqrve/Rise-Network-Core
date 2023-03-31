@@ -51,8 +51,8 @@ public class BanCommand implements CommandExecutor {
         int toSubtract = 1;
         if (args[args.length - 1].equalsIgnoreCase("-s")) toSubtract++;
 
-        StringBuilder reasonBuilder = new StringBuilder();
-        for (int i = 2; i < args.length - toSubtract; i++) reasonBuilder.append(args[i]);
+        StringBuilder reason = new StringBuilder();
+        for (int i = 2; i <= (args.length - toSubtract); i++) reason.append(" ").append(args[i]);
 
         int finalFormat;
         switch (format) {
@@ -76,14 +76,14 @@ public class BanCommand implements CommandExecutor {
         if (!(args[args.length - 1].equalsIgnoreCase("-s"))) {
             String message = " " + time + format;
             if (!expires) message = "ever";
-            Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&f[&6Rise&f] &c" + playerName + " has been banned for" + message + " for reason: " + reasonBuilder.toString()));
+            Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&f[&6Rise&f] &c" + playerName + " has been banned for" + message + " for reason: " + reason.toString()));
         }
 
         Punishment toAdd = new Punishment(
                 Punishment.PunishmentType.BAN,
                 new Date(),
                 finalFormat,
-                reasonBuilder.toString(),
+                reason.toString(),
                 expires,
                 time,
                 sender.getName(),
@@ -98,9 +98,8 @@ public class BanCommand implements CommandExecutor {
             return false;
         }
 
-
         FileManager.savePlayerDocument(toBan, toAdd);
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYou have banned " + playerName + " for " + time + format + " for reason " + reasonBuilder.toString()));
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYou have banned " + playerName + " for " + time + format + " for reason " + reason.toString()));
 
         return false;
     }

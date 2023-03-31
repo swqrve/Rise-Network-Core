@@ -1,5 +1,7 @@
 package me.swerve.file;
 
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
 import me.swerve.RiseCore;
 import me.swerve.cosmetic.Cosmetic;
 import me.swerve.permission.Permission;
@@ -9,19 +11,19 @@ import me.swerve.rank.Rank;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.UUID;
 
 public class FileManager {
 
     public static Document getPlayerDocument(UUID uuid) {
-        File dataFolder = getDataFolder();
+        MongoCollection<Document> collection = RiseCore.getInstance().getMongoDatabase().getCollection("mainCollection");
 
-        File playerFile = new File(dataFolder.getPath() + "/" + uuid.toString() + "-info.json");
         Document document = new Document("uuid", uuid.toString()).append("uuid", uuid.toString());
 
-        if(playerFile.exists()) document = FileUtility.readFromFile(playerFile);
+        FindIterable<Document> iterDoc = collection.find();
+        for (Document doc : iterDoc) if (doc.get("uuid") != null) if (doc.getString("uuid").equalsIgnoreCase(uuid.toString())) document = doc;
+
 
         if(document.get("rank") == null) {
             document.append("rank", "Default");
@@ -45,10 +47,9 @@ public class FileManager {
     }
 
     public static void savePlayerDocument(UUID uuid) {
+        MongoCollection<Document> collection = RiseCore.getInstance().getMongoDatabase().getCollection("mainCollection");
+
         Document document = new Document("uuid", uuid.toString()).append("uuid", uuid.toString());
-
-        File dataFolder = getDataFolder();
-
         CorePlayer player = CorePlayer.getCorePlayers().get(uuid);
 
         player.getRankProfile().save(document);
@@ -57,24 +58,57 @@ public class FileManager {
 
         document.append("coins", player.getCoins());
 
-        File playerFile = new File(dataFolder.getPath() + "/" + uuid + "-info.json");
-        FileUtility.write(playerFile, document);
+        Document docToReplace = null;
+        FindIterable<Document> iterDoc = collection.find();
+        for (Document doc : iterDoc) if (doc.get("uuid") != null) if (doc.getString("uuid").equalsIgnoreCase(uuid.toString())) docToReplace = doc;
+
+        if (docToReplace == null) {
+            collection.insertOne(document);
+            return;
+        }
+
+        collection.findOneAndReplace(docToReplace, document);
+    }
+
+    public static void savePlayerDocument(UUID uuid, Document document) {
+        MongoCollection<Document> collection = RiseCore.getInstance().getMongoDatabase().getCollection("mainCollection");
+
+        Document docToReplace = null;
+        FindIterable<Document> iterDoc = collection.find();
+        for (Document doc : iterDoc) if (doc.get("uuid") != null) if (doc.getString("uuid").equalsIgnoreCase(uuid.toString())) docToReplace = doc;
+
+        if (docToReplace == null) {
+            collection.insertOne(document);
+            return;
+        }
+
+        collection.findOneAndReplace(docToReplace, document);
     }
 
     public static void savePlayerDocument(UUID uuid, String newRank) {
+        MongoCollection<Document> collection = RiseCore.getInstance().getMongoDatabase().getCollection("mainCollection");
+
         Document document = getPlayerDocument(uuid);
-        File dataFolder = getDataFolder();
 
         document.remove("rank");
         document.append("rank", newRank);
 
-        File playerFile = new File(dataFolder.getPath() + "/" + uuid.toString() + "-info.json");
-        FileUtility.write(playerFile, document);
+        Document docToReplace = null;
+        FindIterable<Document> iterDoc = collection.find();
+        for (Document doc : iterDoc) if (doc.get("uuid") != null) if (doc.getString("uuid").equalsIgnoreCase(uuid.toString())) docToReplace = doc;
+
+        if (docToReplace == null) {
+            collection.insertOne(document);
+            return;
+        }
+
+        collection.findOneAndReplace(docToReplace, document);
     }
 
     public static void savePlayerDocument(UUID uuid, Punishment newPunishment) {
+        MongoCollection<Document> collection = RiseCore.getInstance().getMongoDatabase().getCollection("mainCollection");
+
         Document document = getPlayerDocument(uuid);
-        File dataFolder = getDataFolder();
 
         int punishments = document.getInteger("punishments") + 1;
         document.remove("punishments");
@@ -87,22 +121,33 @@ public class FileManager {
         document.append(punishmentTitle + "timeformat", newPunishment.getTimeFormat());
         document.append(punishmentTitle + "reason", newPunishment.getReason());
         document.append(punishmentTitle + "expires", newPunishment.isExpires());
-        document.append(punishmentTitle + "time", newPunishment);
+        document.append(punishmentTitle + "time", newPunishment.getPunishmentTime());
         document.append(punishmentTitle + "punisher", newPunishment.getPunisherName());
         document.append(punishmentTitle + "expired", newPunishment.isExpired());
 
-        File playerFile = new File(dataFolder.getPath() + "/" + uuid.toString() + "-info.json");
-        FileUtility.write(playerFile, document);
+        Document docToReplace = null;
+        FindIterable<Document> iterDoc = collection.find();
+        for (Document doc : iterDoc) if (doc.get("uuid") != null) if (doc.getString("uuid").equalsIgnoreCase(uuid.toString())) docToReplace = doc;
+
+        if (docToReplace == null) {
+            collection.insertOne(document);
+            return;
+        }
+
+        collection.findOneAndReplace(docToReplace, document);
     }
 
 
     public static void loadPermissions() {
-        File dataFolder = getDataFolder();
+        MongoCollection<Document> collection = RiseCore.getInstance().getMongoDatabase().getCollection("mainCollection");
 
-        File permissionsFile = new File(dataFolder + "/permissions.json");
         Document permissionsDoc = new Document("permissions", "permissions");
 
-        if (permissionsFile.exists()) permissionsDoc = FileUtility.readFromFile(permissionsFile);
+        FindIterable<Document> iterDoc = collection.find();
+        for (Document doc : iterDoc) if (doc.getString("permissions") != null && doc.getString("permissions").equalsIgnoreCase("permissions")) {
+            permissionsDoc = doc;
+            System.out.println("Found a doc! - Permissions");
+        }
 
         int permissionsCount = 0;
         if (permissionsDoc.getInteger("permissionCount") != null) permissionsCount = permissionsDoc.getInteger("permissionCount");
@@ -118,10 +163,9 @@ public class FileManager {
     }
 
     public static void savePermissions() {
-        File dataFolder = getDataFolder();
+        MongoCollection<Document> collection = RiseCore.getInstance().getMongoDatabase().getCollection("mainCollection");
 
         Document permissionsDoc = new Document("permissions", "permissions");
-        File permissionsFile = new File(dataFolder + "/permissions.json");
 
         int permissionCount = Permission.getPermissions().size();
 
@@ -134,17 +178,25 @@ public class FileManager {
 
         permissionsDoc.append("permissionCount", permissionCount);
 
+        Document docToReplace = null;
+        FindIterable<Document> iterDoc = collection.find();
+        for (Document doc : iterDoc) if (doc.getString("permissions") != null && doc.getString("permissions").equalsIgnoreCase("permissions")) docToReplace = doc;
 
-        FileUtility.write(permissionsFile, permissionsDoc);
+        if (docToReplace == null) {
+            collection.insertOne(permissionsDoc);
+            return;
+        }
+
+        collection.findOneAndReplace(docToReplace, permissionsDoc);
     }
 
     public static void loadRanks() {
-        File dataFolder = getDataFolder();
+        MongoCollection<Document> collection = RiseCore.getInstance().getMongoDatabase().getCollection("mainCollection");
 
-        File rankFile = new File(dataFolder + "/ranks.json");
-        Document rankDoc = new Document("rank", "rank");
+        Document rankDoc = new Document("ranks", "ranks");
 
-        if (rankFile.exists()) rankDoc = FileUtility.readFromFile(rankFile);
+        FindIterable<Document> iterDoc = collection.find();
+        for (Document doc : iterDoc) if (doc.getString("ranks") != null && doc.getString("ranks").equalsIgnoreCase("ranks")) rankDoc = doc;
 
         int rankCount = 0;
         if (rankDoc.getInteger("rankCount") != null) rankCount = rankDoc.getInteger("rankCount");
@@ -161,12 +213,11 @@ public class FileManager {
         }
     }
     public static void loadCosmetics() {
-        File dataFolder = getDataFolder();
-
-        File cosmeticFile = new File(dataFolder + "/cosmetics.json");
+        MongoCollection<Document> collection = RiseCore.getInstance().getMongoDatabase().getCollection("mainCollection");
         Document cosmeticDoc = new Document("cosmetics", "cosmetics");
 
-        if (cosmeticFile.exists()) cosmeticDoc = FileUtility.readFromFile(cosmeticFile);
+        FindIterable<Document> iterDoc = collection.find();
+        for (Document doc : iterDoc) if (doc.getString("cosmetics") != null && doc.getString("cosmetics").equalsIgnoreCase("cosmetics")) cosmeticDoc = doc;
 
         int cosmeticCount = 0;
         if (cosmeticDoc.getInteger("cosmeticCount") != null) cosmeticCount = cosmeticDoc.getInteger("cosmeticCount");
@@ -182,14 +233,4 @@ public class FileManager {
             );
         }
     }
-
-    private static File getDataFolder() {
-        File dataFolder = new File("C:\\Users\\Administrator\\Desktop\\Rise Network\\rSpigot Servers");
-        dataFolder = new File(dataFolder.getPath() + "/data/");
-
-        if(!dataFolder.exists()) dataFolder.mkdirs();
-
-        return dataFolder;
-    }
-
 }

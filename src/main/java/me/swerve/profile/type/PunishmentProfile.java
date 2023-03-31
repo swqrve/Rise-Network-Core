@@ -13,6 +13,8 @@ public class PunishmentProfile extends Profile {
 
     public Punishment getActive(Punishment.PunishmentType type) {
         for (Punishment p : punishments) {
+            p.update();
+
             if (p.getType() != type) continue;
             if (p.isExpired()) continue;
 
@@ -24,22 +26,27 @@ public class PunishmentProfile extends Profile {
 
     @Override
     public void save(Document document) {
-        document.append("punishments", punishments.size());
+        append(document,"punishments", punishments.size());
 
         int punishmentID = 1;
         for (Punishment punishment : punishments) {
             String punishmentTitle = "punishment-" + punishmentID + "-";
 
-            document.append(punishmentTitle + "type", punishment.getType().toString().toLowerCase());
-            document.append(punishmentTitle + "date", punishment.getPunishmentDate());
-            document.append(punishmentTitle + "timeformat", punishment.getTimeFormat());
-            document.append(punishmentTitle + "reason", punishment.getReason());
-            document.append(punishmentTitle + "expires", punishment.isExpires());
-            document.append(punishmentTitle + "time", punishment.getPunishmentTime());
-            document.append(punishmentTitle + "punisher", punishment.getPunisherName());
-            document.append(punishmentTitle + "expired", punishment.isExpired());
+            append(document,punishmentTitle + "type", punishment.getType().toString().toLowerCase());
+            append(document,punishmentTitle + "date", punishment.getPunishmentDate());
+            append(document,punishmentTitle + "timeformat", punishment.getTimeFormat());
+            append(document,punishmentTitle + "reason", punishment.getReason());
+            append(document,punishmentTitle + "expires", punishment.isExpires());
+            append(document,punishmentTitle + "time", punishment.getPunishmentTime());
+            append(document,punishmentTitle + "punisher", punishment.getPunisherName());
+            append(document,punishmentTitle + "expired", punishment.isExpired());
 
             punishmentID++;
         }
+    }
+
+    private void append(Document document, String key, Object value) {
+        if (document.get(key) != null) document.remove(key);
+        document.append(key, value);
     }
 }
